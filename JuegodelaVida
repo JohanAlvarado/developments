@@ -1,0 +1,102 @@
+class Gameoflife   
+  def initialize()
+    @tablero = 100.times.map{ 0 + Random.rand(2) } 
+    @columnas = 11    
+    @arrrevividas ||= []
+    dibujar()
+  end
+    
+  def dibujar()
+    contador = 1
+    @tablero.each do |celula|
+      if contador % 10 == 0 and contador != 0     
+	      sleep(1.0/24.0)
+	      puts "#{celula}"	 
+	    else
+	      sleep(1.0/24.0)
+	      print "#{celula} "
+	    end
+    	contador += 1      
+    end
+      puts "-----------------------------------------"
+      darvida()
+  end
+    
+  def darvida()
+    ar = []
+    @tablero.each_index {
+	    |x|
+      if @tablero[x] != 1          
+        pos =(!@arrrevividas.include?(x-1)) ?  x - 1   : -1           
+        ar.push(@tablero[pos])	  
+        pos =(!@arrrevividas.include?( x + 1 )) ?  x + 1   : -1         	  
+        ar.push(@tablero[pos])
+        pos = (!@arrrevividas.include?((x - @columnas) + 1 )) ?  (x - @columnas) + 1   : -1            
+        ar.push(@tablero[pos])
+        pos = (!@arrrevividas.include?((x + @columnas) - 1 )) ?  (x + @columnas) - 1   : -1                 
+        ar.push(@tablero[pos])
+        pos = (!@arrrevividas.include?((x - @columnas)   )) ? x - @columnas  : -1                    
+        ar.push(@tablero[pos])
+        pos = (!@arrrevividas.include?((x - @columnas) + 2 )) ?  (x - @columnas) + 2    : -1                    
+        ar.push(@tablero[pos])
+        pos = (!@arrrevividas.include?((x + @columnas) - 2 )) ?  (x + @columnas) - 2   : -1                    
+        ar.push(@tablero[pos])
+        pos = (!@arrrevividas.include?((x + @columnas)  )) ? x + @columnas   : -1                    
+        ar.push(@tablero[pos])           
+        if ar.count(1) === 3 
+          @tablero[x] = 1
+          @arrrevividas.push(x)
+        end            
+          ar.clear            
+      end                                    
+    }    
+    darmuerte()      
+  end    
+  
+  def darmuerte()
+    ar = []
+    @armuertas = []
+    @tablero.each_index {
+	  |x|
+      if @tablero[x] != 0 and !@arrrevividas.include?(x)
+        pos = x - 1              
+        val = ((@tablero[pos] != 0 and !@arrrevividas.include?(pos)) or @armuertas.include?(pos)) ? 1 : 0
+        ar.push(val)	  
+        pos = x + 1        	  
+        val = ((@tablero[pos] != 0 and !@arrrevividas.include?(pos)) or @armuertas.include?(pos)) ? 1 : 0
+	      ar.push(val)
+        pos = (x - @columnas) + 1          
+        val = ((@tablero[pos] != 0 and !@arrrevividas.include?(pos)) or @armuertas.include?(pos)) ? 1 : 0
+	      ar.push(val)
+        pos = (x + @columnas) - 1               
+        val = ((@tablero[pos] != 0 and !@arrrevividas.include?(pos)) or @armuertas.include?(pos)) ? 1 : 0
+        ar.push(val)
+        pos = (x - @columnas)           
+	      val = ((@tablero[pos] != 0 and !@arrrevividas.include?(pos)) or @armuertas.include?(pos)) ? 1 : 0
+	      ar.push(val)        
+	      pos = (x - @columnas) + 2                  
+	      val = ((@tablero[pos] != 0 and !@arrrevividas.include?(pos)) or @armuertas.include?(pos)) ? 1 : 0
+	      ar.push(val)        
+	      pos = (x + @columnas) - 2                  
+	      val = ((@tablero[pos] != 0 and !@arrrevividas.include?(pos)) or @armuertas.include?(pos)) ? 1 : 0
+	      ar.push(val)        
+	      pos = (x + @columnas)                   
+	      val = ((@tablero[pos] != 0 and !@arrrevividas.include?(pos)) or @armuertas.include?(pos)) ? 1 : 0
+	      ar.push(val)    
+        @tablero[x] = (ar.count(1) < 3) ? muertas(x) : 1
+        @tablero[x] = (ar.count(1) > 3) ? muertas(x) : 1
+        @tablero[x] = (ar.count(1) === 3 || ar.count(1) === 2) ? 1 : 0
+      end                   
+      ar = []              
+    }
+    @arrrevividas.clear
+    @armuertas.clear
+    dibujar()
+  end
+    
+  def muertas(x)
+    @armuertas.push(x)
+    return 0
+  end
+end  
+Gameoflife.new
