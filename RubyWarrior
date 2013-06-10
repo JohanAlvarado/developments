@@ -1,0 +1,131 @@
+  class Player  	
+    
+    def play_turn(warrior)       
+      @warrior = warrior
+      @position = [:forward,:backward,:left,:right]	          
+      @persons = @warrior.listen
+      @ticking = false
+      @HEALTH_MIN = 5
+      @HEALTH_MAX = 15
+      @space = 0                   
+      if (thick() || detonate() || bind() || captive() || walkwitharray() || stair()) 
+      end      
+    end
+    
+    def thick()            
+      if @persons.size >0
+        @persons.each do |per|	
+	      if per.ticking?	 
+	        @ticking = true
+	        @space =  @warrior.distance_of(per)	  
+	        @dir = @warrior.direction_of(per)
+	        if @warrior.feel(@dir).empty?	    
+  	          if @warrior.health < @HEALTH_MAX and @space >= 3
+	            @warrior.rest! 
+	          else
+	            @warrior.walk!(@dir)	  	    
+	          end
+	        return true	    
+	      end
+	    end
+      end    	
+      return  false      
+    else 	
+	  stair()
+      end
+    end  
+    
+    def detonate()      
+      detonate = false
+      @pos = nil      
+      count_cap_enemys = 0
+      count_enemys = 0
+      @position.each do |pos| 		
+	    if (@warrior.feel(pos).enemy? ) 	  
+	      @dir = (@ticking != true ) ? pos : @dir
+	      count_enemys += 1  
+	      detonate = true		  
+	    end	
+	    if (@warrior.feel(pos).captive? and @warrior.feel(pos).unit.character != "C" )
+	      @dir = (@ticking != true ) ? pos : @dir
+	      count_cap_enemys += 1
+	      detonate = true	
+	    end
+      end                    
+      if detonate != false 
+      	if (count_enemys == 0 and count_cap_enemys > 0) 
+      	  if @warrior.health < @HEALTH_MIN
+      	    @warrior.rest!	    
+	      else   
+	        if @space >= 3
+	         @warrior.detonate!@dir	    
+	        else
+	          @warrior.attack!@dir
+	        end	    
+	      end
+	      return true
+	    end
+      end      
+    end
+    
+    def bind()            
+      bind = false
+      @position.each do |pos|
+	    if (@warrior.feel(pos).enemy? )  
+	      @warrior.bind!(pos)	 
+	      bind = true
+	      break	  
+	    end
+      end      
+      return (bind != true) ? false : true
+    end
+    
+    def captive()          
+      captive = false
+      @position.each do |pos|	
+	    if @warrior.feel(pos).captive? && @warrior.feel(pos).unit.character == "C"
+	      @warrior.rescue!pos
+	      captive = true
+	  break
+	else	  
+	  if @warrior.feel(pos).captive? && @warrior.feel(pos).unit.character != "C"	    
+	    @warrior.attack!pos
+	    captive = true
+	    break
+	  end
+	end
+      end
+      return (captive != true) ? false : true          
+    end
+    
+    def walkwitharray()
+      flag = true
+      if @persons.size > 0
+	    @persons.each do |per|
+	      if flag != true
+  	        break
+	      end
+	      if @warrior.feel(@warrior.direction_of(per)).stairs? || @warrior.feel(@warrior.direction_of(per)).wall?
+  	        @position.each do |dir|
+	        if dir != @dir
+		      if !@warrior.feel(dir).stairs? and !@warrior.feel(dir).wall?
+		        @warrior.walk!dir
+		        flag = false
+		        break
+		      end
+		    end	  
+		  end
+        else
+          @warrior.walk!@warrior.direction_of(@persons.first)
+	      break
+	    end
+	  end
+	    return true
+      end    
+    end
+    
+    def stair()
+      puts 26
+      @warrior.walk!@warrior.direction_of_stairs
+    end
+  end
